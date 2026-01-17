@@ -1,20 +1,23 @@
-import React from "react";
-import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { View, Text, StyleSheet } from "react-native";
-import { useAppStore } from "../store";
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text, StyleSheet } from 'react-native';
+import { useAuthStore } from '../store/authStore';
+import { THEMES } from '../constants';
 
-// Placeholder screens - to be replaced by feature developers
-const AuthScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.text}>Auth Screen</Text>
-  </View>
-);
+// Import real screens
+import { AuthScreen } from '../screens/AuthScreen';
+import { ProfileScreen } from '../screens/ProfileScreen';
 
+// Use Rainforest theme as default
+const theme = THEMES.rainforest;
+
+// Placeholder screens - to be replaced by other feature developers
 const HomeScreen = () => (
   <View style={styles.container}>
     <Text style={styles.text}>Home Screen</Text>
+    <Text style={styles.subtext}>Paste your first recipe to get started!</Text>
   </View>
 );
 
@@ -33,12 +36,6 @@ const PantryScreen = () => (
 const LibraryScreen = () => (
   <View style={styles.container}>
     <Text style={styles.text}>Library Screen</Text>
-  </View>
-);
-
-const ProfileScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.text}>Profile Screen</Text>
   </View>
 );
 
@@ -65,12 +62,14 @@ const MainTabs = () => {
     <Tab.Navigator
       screenOptions={{
         headerShown: false,
+        freezeOnBlur: false, // Disable to fix Fabric compatibility
         tabBarStyle: {
-          backgroundColor: "#1B5E20",
-          borderTopColor: "#2E7D32",
+          backgroundColor: theme.surface,
+          borderTopColor: theme.primary,
+          borderTopWidth: 1,
         },
-        tabBarActiveTintColor: "#4CAF50",
-        tabBarInactiveTintColor: "#A5D6A7",
+        tabBarActiveTintColor: theme.accent,
+        tabBarInactiveTintColor: theme.textSecondary,
       }}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
@@ -82,14 +81,17 @@ const MainTabs = () => {
 };
 
 export const AppNavigator = () => {
-  const isAuthenticated = useAppStore((state) => state.isAuthenticated);
+  // Use authStore for authentication state
+  const user = useAuthStore((state) => state.user);
+  const isAuthenticated = !!user;
 
   return (
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: "#1B5E20" },
+          freezeOnBlur: false, // Disable to fix Fabric compatibility
+          contentStyle: { backgroundColor: theme.background },
         }}
       >
         {!isAuthenticated ? (
@@ -108,14 +110,19 @@ export const AppNavigator = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1B5E20",
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: theme.background,
   },
   text: {
-    color: "#E8F5E9",
+    color: theme.textPrimary,
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: '600',
+  },
+  subtext: {
+    color: theme.textSecondary,
+    fontSize: 14,
+    marginTop: 8,
   },
 });
 
