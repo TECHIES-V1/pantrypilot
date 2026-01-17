@@ -1,10 +1,9 @@
 import { THEMES } from "../constants";
-import type { ThemeName } from "../store";
 
 /**
  * Get theme colors by theme name
  */
-export const getTheme = (themeName: ThemeName) => {
+export const getTheme = (themeName: App.ThemeName) => {
   return THEMES[themeName];
 };
 

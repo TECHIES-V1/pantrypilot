@@ -1,13 +1,13 @@
 import { StateCreator } from "zustand";
 
 export interface PantrySlice {
-  items: DB.PantryItem[];
-  isLoading: boolean;
-  setItems: (items: DB.PantryItem[]) => void;
-  addItem: (item: DB.PantryItem) => void;
-  removeItem: (id: string) => void;
-  updateItem: (id: string, updates: Partial<DB.PantryItem>) => void;
-  setLoading: (loading: boolean) => void;
+  pantryItems: DB.PantryItem[];
+  pantryLoading: boolean;
+  setPantryItems: (items: DB.PantryItem[]) => void;
+  addPantryItem: (item: DB.PantryItem) => void;
+  removePantryItem: (id: string) => void;
+  updatePantryItem: (id: string, updates: Partial<DB.PantryItem>) => void;
+  setPantryLoading: (loading: boolean) => void;
   clearPantry: () => void;
 }
 
@@ -17,16 +17,21 @@ export const createPantrySlice: StateCreator<
   [],
   PantrySlice
 > = (set) => ({
-  items: [],
-  isLoading: false,
-  setItems: (items) => set({ items }),
-  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  removeItem: (id) =>
-    set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
-  updateItem: (id, updates) =>
+  pantryItems: [],
+  pantryLoading: false,
+  setPantryItems: (pantryItems) => set({ pantryItems }),
+  addPantryItem: (item) =>
+    set((state) => ({ pantryItems: [...state.pantryItems, item] })),
+  removePantryItem: (id) =>
     set((state) => ({
-      items: state.items.map((i) => (i.id === id ? { ...i, ...updates } : i)),
+      pantryItems: state.pantryItems.filter((i) => i.id !== id),
     })),
-  setLoading: (isLoading) => set({ isLoading }),
-  clearPantry: () => set({ items: [] }),
+  updatePantryItem: (id, updates) =>
+    set((state) => ({
+      pantryItems: state.pantryItems.map((i) =>
+        i.id === id ? { ...i, ...updates } : i,
+      ),
+    })),
+  setPantryLoading: (pantryLoading) => set({ pantryLoading }),
+  clearPantry: () => set({ pantryItems: [] }),
 });

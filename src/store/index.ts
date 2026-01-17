@@ -42,7 +42,7 @@ export const useAppStore = create<AppStore>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         currentTheme: state.currentTheme,
-        items: state.items, // pantry items
+        pantryItems: state.pantryItems,
         recipes: state.recipes,
         plans: state.plans,
       }),
@@ -56,8 +56,8 @@ export const useIsAuthenticated = () =>
   useAppStore((state) => state.isAuthenticated);
 export const useTheme = () => useAppStore((state) => state.currentTheme);
 export const useRecipes = () => useAppStore((state) => state.recipes);
-export const usePantryItems = () => useAppStore((state) => state.items);
-export const useGroceryItems = () => useAppStore((state) => state.items);
+export const usePantryItems = () => useAppStore((state) => state.pantryItems);
+export const useGroceryItems = () => useAppStore((state) => state.groceryItems);
 export const usePlans = () => useAppStore((state) => state.plans);
 
 export default useAppStore;

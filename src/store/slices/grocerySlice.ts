@@ -1,15 +1,15 @@
 import { StateCreator } from "zustand";
 
 export interface GrocerySlice {
-  items: DB.GroceryItem[];
-  isLoading: boolean;
-  setItems: (items: DB.GroceryItem[]) => void;
-  addItem: (item: DB.GroceryItem) => void;
-  toggleItem: (id: string) => void;
-  removeItem: (id: string) => void;
-  updateItem: (id: string, updates: Partial<DB.GroceryItem>) => void;
-  clearList: () => void;
-  setLoading: (loading: boolean) => void;
+  groceryItems: DB.GroceryItem[];
+  groceryLoading: boolean;
+  setGroceryItems: (items: DB.GroceryItem[]) => void;
+  addGroceryItem: (item: DB.GroceryItem) => void;
+  toggleGroceryItem: (id: string) => void;
+  removeGroceryItem: (id: string) => void;
+  updateGroceryItem: (id: string, updates: Partial<DB.GroceryItem>) => void;
+  clearGroceryList: () => void;
+  setGroceryLoading: (loading: boolean) => void;
 }
 
 export const createGrocerySlice: StateCreator<
@@ -18,22 +18,27 @@ export const createGrocerySlice: StateCreator<
   [],
   GrocerySlice
 > = (set) => ({
-  items: [],
-  isLoading: false,
-  setItems: (items) => set({ items }),
-  addItem: (item) => set((state) => ({ items: [...state.items, item] })),
-  toggleItem: (id) =>
+  groceryItems: [],
+  groceryLoading: false,
+  setGroceryItems: (groceryItems) => set({ groceryItems }),
+  addGroceryItem: (item) =>
+    set((state) => ({ groceryItems: [...state.groceryItems, item] })),
+  toggleGroceryItem: (id) =>
     set((state) => ({
-      items: state.items.map((i) =>
+      groceryItems: state.groceryItems.map((i) =>
         i.id === id ? { ...i, checked: !i.checked } : i,
       ),
     })),
-  removeItem: (id) =>
-    set((state) => ({ items: state.items.filter((i) => i.id !== id) })),
-  updateItem: (id, updates) =>
+  removeGroceryItem: (id) =>
     set((state) => ({
-      items: state.items.map((i) => (i.id === id ? { ...i, ...updates } : i)),
+      groceryItems: state.groceryItems.filter((i) => i.id !== id),
     })),
-  clearList: () => set({ items: [] }),
-  setLoading: (isLoading) => set({ isLoading }),
+  updateGroceryItem: (id, updates) =>
+    set((state) => ({
+      groceryItems: state.groceryItems.map((i) =>
+        i.id === id ? { ...i, ...updates } : i,
+      ),
+    })),
+  clearGroceryList: () => set({ groceryItems: [] }),
+  setGroceryLoading: (groceryLoading) => set({ groceryLoading }),
 });
