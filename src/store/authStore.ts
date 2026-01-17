@@ -26,39 +26,35 @@ interface AuthActions {
 
 type AuthStore = AuthState & AuthActions;
 
-// Helper to upsert profile after auth
-const upsertProfile = async (user: User): Promise<DB.Profile | null> => {
-  const { data, error } = await supabase
-    .from('profiles')
-    .upsert(
-      {
-        id: user.id,
-        email: user.email || '',
-        tier: 'free',
-        monthly_recipe_count: 0,
-      },
-      { onConflict: 'id' }
-    )
-    .select()
-    .single();
+// Fetch profile with retry (waits for DB trigger to create profile)
+const getOrWaitForProfile = async (userId: string, maxRetries = 5): Promise<DB.Profile | null> => {
+  for (let i = 0; i < maxRetries; i++) {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle(); // Use maybeSingle to avoid PGRST116 error
 
-  if (error) {
-    console.error('Profile upsert error:', error);
-    return null;
+    if (data) return data as DB.Profile;
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Profile fetch error:', error);
+      return null;
+    }
+
+    // Wait before retrying (profile might be created by DB trigger)
+    if (i < maxRetries - 1) {
+      console.log(`Profile not found yet, retrying... (${i + 1}/${maxRetries})`);
+      await new Promise(r => setTimeout(r, 300));
+    }
   }
-  return data as DB.Profile;
+
+  console.warn('Profile not found after retries');
+  return null;
 };
 
-// Fetch existing profile
-const fetchProfile = async (userId: string): Promise<DB.Profile | null> => {
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single();
-
-  if (error) {
-    console.error('Profile fetch error:', error);
-    return null;
-  }
-  return data as DB.Profile;
-};
+// Alias for backward compatibility
+const fetchProfile = getOrWaitForProfile;
 
 // Handle auth errors consistently
 const handleAuthError = (error: AuthError | null): string | null => {
@@ -154,8 +150,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       }
 
       if (data.user) {
-        // Upsert profile for new user
-        const profile = await upsertProfile(data.user);
+        // Fetch profile (created by DB trigger)
+        const profile = await getOrWaitForProfile(data.user.id);
         set({
           session: data.session,
           user: data.user,
@@ -167,7 +163,6 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ error: 'Sign up failed', loading: false });
     }
   },
-
   // Google OAuth
   signInWithGoogle: async () => {
     set({ loading: true, error: null });
@@ -206,18 +201,83 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       // Open auth URL in browser
       const result = await WebBrowser.openAuthSessionAsync(data.url, redirectUrl);
 
-      if (result.type === 'success') {
-        // Supabase handles PKCE flow - just get the session
-        const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (result.type === 'success' && result.url) {
+        console.log('OAuth callback URL:', result.url);
 
-        if (sessionError) {
-          throw sessionError;
+        // Parse the callback URL
+        const callbackUrl = result.url;
+
+        // Try PKCE flow first (code in query params)
+        const urlObj = new URL(callbackUrl.split('#')[0]); // Get URL without hash
+        const code = urlObj.searchParams.get('code');
+
+        if (code) {
+          // PKCE flow - exchange code for session
+          console.log('Found authorization code, exchanging...');
+          const { data: sessionData, error: sessionError } =
+            await supabase.auth.exchangeCodeForSession(code);
+
+          if (sessionError) {
+            throw sessionError;
+          }
+
+          if (sessionData.session) {
+            // Fetch profile (created by DB trigger)
+            const profile = await getOrWaitForProfile(sessionData.session.user.id);
+            set({
+              session: sessionData.session,
+              user: sessionData.session.user,
+              profile,
+              loading: false,
+            });
+            return;
+          }
         }
 
-        if (sessionData.session) {
-          // Fetch profile for the user
-          const profile = await fetchProfile(sessionData.session.user.id);
+        // Implicit flow - tokens in hash fragment
+        if (callbackUrl.includes('#')) {
+          console.log('Found hash fragment, extracting tokens...');
+          const hashFragment = callbackUrl.split('#')[1];
+          const hashParams = new URLSearchParams(hashFragment);
 
+          const accessToken = hashParams.get('access_token');
+          const refreshToken = hashParams.get('refresh_token');
+
+          if (accessToken) {
+            // Set session using the tokens
+            const { data: sessionData, error: sessionError } =
+              await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken || '',
+              });
+
+            if (sessionError) {
+              throw sessionError;
+            }
+
+            if (sessionData.session) {
+              // Fetch profile (created by DB trigger)
+              const profile = await getOrWaitForProfile(sessionData.session.user.id);
+              set({
+                session: sessionData.session,
+                user: sessionData.session.user,
+                profile,
+                loading: false,
+              });
+              return;
+            }
+          }
+        }
+
+        // Fallback - try getting existing session
+        const { data: sessionData, error: sessionError } =
+          await supabase.auth.getSession();
+
+        if (sessionError) throw sessionError;
+
+        if (sessionData.session) {
+          // Fetch profile (created by DB trigger)
+          const profile = await getOrWaitForProfile(sessionData.session.user.id);
           set({
             session: sessionData.session,
             user: sessionData.session.user,
@@ -225,7 +285,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
             loading: false,
           });
         } else {
-          throw new Error('Session not created after OAuth');
+          throw new Error('Failed to establish session');
         }
       } else {
         // User cancelled or dismissed
