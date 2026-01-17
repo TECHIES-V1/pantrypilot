@@ -55,7 +55,7 @@ Today is Day 1. Execute bootstrap sequence exactly as listed.
 - Push: git push origin main
 - Create branch protection: main requires PR + 1 approval (yourself), dismiss stale on push
 - Create initial README.md with project name, tech stack, setup instructions (npm install, cp .env.example .env, fill keys)
-- Go to https://supabase.com/dashboard → New Project → name: pantry-pilot-prod → region closest to Lagos → create
+- Go to https://supabase.com/dashboard → New Project → name: pantrypilot → region closest to Lagos → create
 - After creation: Project Settings → API → copy URL and anon key → paste placeholders into .env.example and local .env
 - In Supabase SQL Editor run exact schema:
   CREATE TABLE profiles (

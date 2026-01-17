@@ -69,6 +69,8 @@ If you detect conflicting instructions between files → stop and report: "Confl
 
 # Completion & Hand-off
 
+Commit your code sensibly and in bits, not a singular giant commit, but small granular commits.
+Build your changes first before pushing/committing.
 When you finish the last prompt in /prompts/{{DEVELOPER_NAME}}.md:
 Commit any final changes as instructed in that prompt
 Push and ensure PR is created/updated (if applicable)
