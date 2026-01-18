@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   StyleSheet,
   Alert,
+  AppState,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as Clipboard from 'expo-clipboard';
@@ -76,6 +77,30 @@ export default function RecipeInputScreen() {
     } else {
       setDetectedType(null);
     }
+  }, [textInput, imageUri]);
+
+  // Auto-paste on focus
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', async (nextAppState) => {
+      if (nextAppState === 'active' && !textInput && !imageUri) {
+        try {
+          const content = await Clipboard.getStringAsync();
+          if (content) {
+            const trimmed = content.trim();
+            // Auto-fill if it looks like a URL or is substantial text
+            if (trimmed.startsWith('http') || trimmed.length > 50) {
+              setTextInput(content);
+            }
+          }
+        } catch (_err) {
+          // Ignore clipboard errors
+        }
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, [textInput, imageUri]);
 
   // Handle paste from clipboard
@@ -308,10 +333,20 @@ export default function RecipeInputScreen() {
     submitButtonDisabled: {
       opacity: 0.5,
     },
+
     submitButtonText: {
       color: theme.textPrimary,
       fontSize: TYPOGRAPHY.sizes.lg,
       fontWeight: TYPOGRAPHY.weights.semibold,
+    },
+    charCounter: {
+      textAlign: 'right',
+      color: theme.textSecondary,
+      fontSize: TYPOGRAPHY.sizes.xs,
+      marginTop: SPACING.xs,
+    },
+    charCounterWarning: {
+      color: '#ff4444', // Red for warning
     },
   });
 
@@ -359,6 +394,9 @@ export default function RecipeInputScreen() {
           {detectedType && !imageUri && (
             <Text style={styles.detectedLabel}>Detected: {detectedType.toUpperCase()}</Text>
           )}
+          <Text style={[styles.charCounter, textInput.length > 5000 && styles.charCounterWarning]}>
+            {textInput.length}/5000
+          </Text>
         </View>
 
         {/* Action Buttons Row */}
