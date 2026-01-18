@@ -12,6 +12,11 @@ export interface RecipeState {
   rawInput: RawInput | null;
   loading: boolean;
   error: string | null;
+  draft: string | null;
+  history: string[]; // History of last 3 inputs (text/urls)
+
   setRawInput: (input: RawInput) => void;
   clearInput: () => void;
+  setDraft: (draft: string | null) => void;
+  addToHistory: (input: string) => void;
 }

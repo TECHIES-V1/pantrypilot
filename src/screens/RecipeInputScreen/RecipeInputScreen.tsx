@@ -24,7 +24,8 @@ import type { RawInput } from '../../types/recipe';
 export default function RecipeInputScreen() {
   const navigation = useNavigation();
   const { user } = useAuthStore();
-  const { setRawInput, clearInput, loading } = useRecipeStore();
+  const { setRawInput, clearInput, loading, draft, history, setDraft, addToHistory } =
+    useRecipeStore();
   const currentTheme = useAppStore((state) => state.currentTheme);
   const theme = THEMES[currentTheme];
 
@@ -41,7 +42,26 @@ export default function RecipeInputScreen() {
     }
   }, [user, navigation]);
 
-  // Request permissions on mount
+  // Draft persistence: Load on mount if empty
+  useEffect(() => {
+    if (draft && !textInput && !imageUri) {
+      setTextInput(draft);
+    }
+  }, [draft]); // Run once on mount/hydration
+
+  // Save text to draft on change (debounced effectively by typing speed)
+  useEffect(() => {
+    if (textInput) {
+      setDraft(textInput);
+    }
+  }, [textInput, setDraft]);
+
+  // Handle history item selection
+  const handleHistorySelection = (item: string) => {
+    setTextInput(item);
+    setImageUri(null);
+  };
+
   useEffect(() => {
     (async () => {
       const cameraPermission = await ImagePicker.requestCameraPermissionsAsync();
@@ -214,8 +234,15 @@ export default function RecipeInputScreen() {
       return;
     }
 
+    // Add to history if valid text/url
+    if (input.type === 'url' || input.type === 'text') {
+      addToHistory(input.content);
+    }
+
+    // Clear draft
+    setDraft(null);
+
     setRawInput(input);
-    // Navigate to processing screen (placeholder for now)
     navigation.navigate('Processing' as never);
   };
 
@@ -348,6 +375,41 @@ export default function RecipeInputScreen() {
     charCounterWarning: {
       color: '#ff4444', // Red for warning
     },
+    historyContainer: {
+      marginBottom: SPACING.md,
+    },
+    historyLabel: {
+      color: theme.textSecondary,
+      fontSize: TYPOGRAPHY.sizes.xs,
+      marginBottom: SPACING.xs,
+    },
+    chipsRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: SPACING.sm,
+    },
+    chip: {
+      backgroundColor: theme.surface,
+      borderRadius: 16,
+      paddingVertical: 6,
+      paddingHorizontal: 12,
+      borderWidth: 1,
+      borderColor: theme.primary,
+    },
+    chipText: {
+      color: theme.textPrimary,
+      fontSize: TYPOGRAPHY.sizes.sm,
+    },
+    voiceStub: {
+      alignItems: 'center',
+      marginBottom: SPACING.lg,
+      opacity: 0.6,
+    },
+    voiceStubText: {
+      color: theme.textSecondary,
+      fontSize: TYPOGRAPHY.sizes.sm,
+      fontStyle: 'italic',
+    },
   });
 
   return (
@@ -397,6 +459,34 @@ export default function RecipeInputScreen() {
           <Text style={[styles.charCounter, textInput.length > 5000 && styles.charCounterWarning]}>
             {textInput.length}/5000
           </Text>
+        </View>
+
+        {/* Recent History Chips */}
+        {history.length > 0 && (
+          <View style={styles.historyContainer}>
+            <Text style={styles.historyLabel}>Recent:</Text>
+            <View style={styles.chipsRow}>
+              {history.map((item, index) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.chip}
+                  onPress={() => handleHistorySelection(item)}
+                  accessible
+                  accessibilityLabel={`Use recent input: ${item}`}
+                  accessibilityRole="button"
+                >
+                  <Text style={styles.chipText} numberOfLines={1}>
+                    {item.length > 25 ? item.slice(0, 25) + '...' : item}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Voice Input Stub */}
+        <View style={styles.voiceStub}>
+          <Text style={styles.voiceStubText}>🎤 Voice Dictation coming soon</Text>
         </View>
 
         {/* Action Buttons Row */}
