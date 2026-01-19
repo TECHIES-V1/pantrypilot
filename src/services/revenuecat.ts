@@ -29,3 +29,12 @@ export const purchasePlus = async () => {
   if (!packageToPurchase) throw new Error("No Plus package found");
   return Purchases.purchasePackage(packageToPurchase);
 };
+
+export const purchasePro = async () => {
+  const offerings = await Purchases.getOfferings();
+  const packageToPurchase = offerings.current?.availablePackages.find((p) =>
+    p.identifier.includes("pro"),
+  );
+  if (!packageToPurchase) throw new Error("No Pro package found");
+  return Purchases.purchasePackage(packageToPurchase);
+};
