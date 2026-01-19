@@ -9,6 +9,8 @@ import { THEMES } from '../constants';
 // Import real screens
 import { AuthScreen } from '../screens/AuthScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
+import { RecipeInputScreen } from '../screens/RecipeInputScreen';
+import ProcessingScreen from '../screens/ProcessingScreen';
 
 // Use Rainforest theme as default
 const theme = THEMES.rainforest;
@@ -21,12 +23,6 @@ const HomeScreen = () => (
   </View>
 );
 
-const RecipeInputScreen = () => (
-  <View style={styles.container}>
-    <Text style={styles.text}>Recipe Input Screen</Text>
-  </View>
-);
-
 const PantryScreen = () => (
   <View style={styles.container}>
     <Text style={styles.text}>Pantry Screen</Text>
@@ -35,7 +31,7 @@ const PantryScreen = () => (
 
 const LibraryScreen = () => (
   <View style={styles.container}>
-    <Text style={styles.text}>Library Screen</Text>
+    <Text style={styles.text}>Library Screen </Text>
   </View>
 );
 
@@ -43,6 +39,7 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
   RecipeInput: undefined;
+  Processing: undefined;
   CookingMode: { recipeId: string };
   GroceryList: { recipeId?: string; planId?: string };
 };
@@ -100,6 +97,7 @@ export const AppNavigator = () => {
           <>
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="RecipeInput" component={RecipeInputScreen} />
+            <Stack.Screen name="Processing" component={ProcessingScreen} />
           </>
         )}
       </Stack.Navigator>
