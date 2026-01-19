@@ -18,12 +18,17 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../store/authStore';
 import { useRecipeStore } from '../../store/recipeStore';
 import { useAppStore } from '../../store';
+import { useSubscriptionStore } from '../../store/subscriptionStore';
+import { UsageLimitBanner } from '../../components/UsageLimitBanner';
+import { PaywallModal } from '../../components/PaywallModal';
 import { THEMES, SPACING, TYPOGRAPHY } from '../../constants';
 import type { RawInput } from '../../types/recipe';
 
 export default function RecipeInputScreen() {
   const navigation = useNavigation();
-  const { user } = useAuthStore();
+  const { user, profile } = useAuthStore();
+  const { isPlus } = useSubscriptionStore();
+  const [showPaywall, setShowPaywall] = useState(false);
   const { setRawInput, clearInput, loading, draft, history, setDraft, addToHistory } =
     useRecipeStore();
   const currentTheme = useAppStore((state) => state.currentTheme);
@@ -193,8 +198,15 @@ export default function RecipeInputScreen() {
     clearInput();
   };
 
+  const isLimitReached = !isPlus && (profile?.monthly_recipe_count || 0) >= 5;
+
   // Validate and submit input
   const handleSubmit = () => {
+    if (isLimitReached) {
+      setShowPaywall(true);
+      return;
+    }
+
     let input: RawInput | null = null;
 
     if (imageUri) {
@@ -414,6 +426,8 @@ export default function RecipeInputScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      <UsageLimitBanner onUpgradePress={() => setShowPaywall(true)} />
+      
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
@@ -565,6 +579,8 @@ export default function RecipeInputScreen() {
           )}
         </TouchableOpacity>
       </ScrollView>
+
+      <PaywallModal isVisible={showPaywall} onClose={() => setShowPaywall(false)} />
     </SafeAreaView>
   );
 }

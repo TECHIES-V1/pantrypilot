@@ -3,12 +3,16 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'rea
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthStore } from '../store/authStore';
 import { THEMES, SPACING, TYPOGRAPHY } from '../constants';
+import { PaywallModal } from '../components/PaywallModal';
+import { useSubscriptionStore } from '../store/subscriptionStore';
 
 // Use Rainforest theme as default
 const theme = THEMES.rainforest;
 
 export const ProfileScreen: React.FC = () => {
   const { profile, user, signOut, loading } = useAuthStore();
+  const { isPlus, isPro } = useSubscriptionStore();
+  const [showPaywall, setShowPaywall] = React.useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -33,8 +37,15 @@ export const ProfileScreen: React.FC = () => {
 
           <View style={styles.infoRow}>
             <Text style={styles.label}>Tier</Text>
-            <View style={styles.tierBadge}>
-              <Text style={styles.tierText}>{profile?.tier?.toUpperCase() || 'FREE'}</Text>
+            <View style={styles.tierContainer}>
+              <View style={[styles.tierBadge, { backgroundColor: (isPlus || isPro) ? theme.accent : theme.primary }]}>
+                <Text style={styles.tierText}>{profile?.tier?.toUpperCase() || 'FREE'}</Text>
+              </View>
+              {(!isPlus && !isPro) && (
+                <TouchableOpacity onPress={() => setShowPaywall(true)} style={styles.upgradeBtn}>
+                  <Text style={styles.upgradeBtnText}>Upgrade</Text>
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -76,6 +87,7 @@ export const ProfileScreen: React.FC = () => {
           )}
         </TouchableOpacity>
       </View>
+      <PaywallModal isVisible={showPaywall} onClose={() => setShowPaywall(false)} />
     </SafeAreaView>
   );
 };
@@ -129,6 +141,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.background,
     marginVertical: SPACING.sm,
   },
+  tierContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   tierBadge: {
     backgroundColor: theme.accent,
     paddingHorizontal: SPACING.sm,
@@ -139,6 +155,20 @@ const styles = StyleSheet.create({
     fontSize: TYPOGRAPHY.sizes.xs,
     fontWeight: '700',
     color: theme.background,
+  },
+  upgradeBtn: {
+    marginLeft: SPACING.sm,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: theme.accent,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  upgradeBtnText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: theme.accent,
   },
   sectionTitle: {
     fontSize: TYPOGRAPHY.sizes.md,

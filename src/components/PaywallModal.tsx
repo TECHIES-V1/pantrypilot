@@ -21,25 +21,47 @@ interface PaywallModalProps {
 export const PaywallModal: React.FC<PaywallModalProps> = ({ isVisible, onClose }) => {
   const currentTheme = useAppStore((state) => state.currentTheme);
   const theme = THEMES[currentTheme];
-  const { fetchEntitlements } = useSubscriptionStore();
+  const { fetchEntitlements, restorePurchases, loading: subLoading } = useSubscriptionStore();
+  const [localLoading, setLocalLoading] = React.useState(false);
+
+  const loading = subLoading || localLoading;
 
   const handleSubscribePlus = async () => {
+    setLocalLoading(true);
     try {
       await purchasePlus();
       await fetchEntitlements();
       onClose();
     } catch (e) {
       console.error("Purchase Plus failed:", e);
+      // In a real app, use a Toast here
+    } finally {
+      setLocalLoading(false);
     }
   };
 
   const handleSubscribePro = async () => {
+    setLocalLoading(true);
     try {
       await purchasePro();
       await fetchEntitlements();
       onClose();
     } catch (e) {
       console.error("Purchase Pro failed:", e);
+    } finally {
+      setLocalLoading(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    setLocalLoading(true);
+    try {
+      await restorePurchases();
+      onClose();
+    } catch (e) {
+      console.error("Restore failed:", e);
+    } finally {
+      setLocalLoading(false);
     }
   };
 
@@ -79,20 +101,30 @@ export const PaywallModal: React.FC<PaywallModalProps> = ({ isVisible, onClose }
 
           <View style={styles.buttonContainer}>
             <TouchableOpacity 
-              style={[styles.button, { backgroundColor: theme.primary }]}
+              style={[styles.button, { backgroundColor: theme.primary }, loading && styles.buttonDisabled]}
               onPress={handleSubscribePlus}
+              disabled={loading}
             >
               <Text style={styles.buttonText}>Subscribe to Plus</Text>
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.button, { backgroundColor: theme.accent, marginTop: SPACING.sm }]}
+              style={[styles.button, { backgroundColor: theme.accent, marginTop: SPACING.sm }, loading && styles.buttonDisabled]}
               onPress={handleSubscribePro}
+              disabled={loading}
             >
               <Text style={styles.buttonText}>Subscribe to Pro</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <TouchableOpacity 
+              style={styles.restoreButton} 
+              onPress={handleRestore}
+              disabled={loading}
+            >
+              <Text style={[styles.restoreButtonText, { color: theme.textSecondary }]}>Restore Purchases</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.closeButton} onPress={onClose} disabled={loading}>
               <Text style={[styles.closeButtonText, { color: theme.textSecondary }]}>Close</Text>
             </TouchableOpacity>
           </View>
@@ -161,8 +193,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: TYPOGRAPHY.sizes.md,
   },
-  closeButton: {
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  restoreButton: {
     marginTop: SPACING.lg,
+    alignItems: 'center',
+  },
+  restoreButtonText: {
+    fontSize: TYPOGRAPHY.sizes.xs,
+    textDecorationLine: 'underline',
+  },
+  closeButton: {
+    marginTop: SPACING.md,
     alignItems: 'center',
   },
   closeButtonText: {

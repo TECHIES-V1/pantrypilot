@@ -34,6 +34,7 @@ export default function App() {
 
     initAuth();
     configureRevenueCat();
+    const cleanupListener = useSubscriptionStore.getState().initializeListener();
 
     // Set up auth state change listener
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
@@ -86,6 +87,7 @@ export default function App() {
     // Cleanup listener on unmount
     return () => {
       listener.subscription.unsubscribe();
+      cleanupListener();
     };
   }, [initialize]);
 
