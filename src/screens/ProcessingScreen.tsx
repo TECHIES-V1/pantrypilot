@@ -10,7 +10,7 @@ import {
 import { useNavigation } from '@react-navigation/native';
 
 import { THEMES, SPACING, TYPOGRAPHY } from '../constants';
-import { useAppStore } from '../store';
+import { useThemeStore } from '../store';
 
 const PROCESSING_STEPS = [
   'Validating input...',
@@ -30,7 +30,7 @@ const FUN_FACTS = [
 export default function ProcessingScreen() {
   const navigation = useNavigation();
 
-  const currentTheme = useAppStore((state) => state.currentTheme);
+  const currentTheme = useThemeStore((state) => state.currentTheme);
   const theme = THEMES[currentTheme];
 
   const [currentStep, setCurrentStep] = useState(0);

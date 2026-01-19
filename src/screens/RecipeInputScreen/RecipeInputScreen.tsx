@@ -17,7 +17,7 @@ import * as Clipboard from 'expo-clipboard';
 import { useNavigation } from '@react-navigation/native';
 import { useAuthStore } from '../../store/authStore';
 import { useRecipeStore } from '../../store/recipeStore';
-import { useAppStore } from '../../store';
+import { useThemeStore } from '../../store';
 import { THEMES, SPACING, TYPOGRAPHY } from '../../constants';
 import type { RawInput } from '../../types/recipe';
 
@@ -26,7 +26,7 @@ export default function RecipeInputScreen() {
   const { user } = useAuthStore();
   const { setRawInput, clearInput, loading, draft, history, setDraft, addToHistory } =
     useRecipeStore();
-  const currentTheme = useAppStore((state) => state.currentTheme);
+  const currentTheme = useThemeStore((state) => state.currentTheme);
   const theme = THEMES[currentTheme];
 
   const [textInput, setTextInput] = useState('');

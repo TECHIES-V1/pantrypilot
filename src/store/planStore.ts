@@ -1,6 +1,6 @@
-import { StateCreator } from "zustand";
+import { create } from 'zustand';
 
-export interface PlanSlice {
+interface PlanState {
   plans: DB.Plan[];
   currentPlan: DB.Plan | null;
   isLoading: boolean;
@@ -12,9 +12,7 @@ export interface PlanSlice {
   setLoading: (loading: boolean) => void;
 }
 
-export const createPlanSlice: StateCreator<PlanSlice, [], [], PlanSlice> = (
-  set,
-) => ({
+export const usePlanStore = create<PlanState>()((set) => ({
   plans: [],
   currentPlan: null,
   isLoading: false,
@@ -24,8 +22,9 @@ export const createPlanSlice: StateCreator<PlanSlice, [], [], PlanSlice> = (
     set((state) => ({
       plans: state.plans.map((p) => (p.id === id ? { ...p, ...updates } : p)),
     })),
-  removePlan: (id) =>
-    set((state) => ({ plans: state.plans.filter((p) => p.id !== id) })),
+  removePlan: (id) => set((state) => ({ plans: state.plans.filter((p) => p.id !== id) })),
   setCurrentPlan: (currentPlan) => set({ currentPlan }),
   setLoading: (isLoading) => set({ isLoading }),
-});
+}));
+
+export default usePlanStore;
