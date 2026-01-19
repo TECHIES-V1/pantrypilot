@@ -1,4 +1,4 @@
-DEVELOPER_NAME = Daniel
+DEVELOPER_NAME = Eyitayo
 
 # Identity Resolution
 
