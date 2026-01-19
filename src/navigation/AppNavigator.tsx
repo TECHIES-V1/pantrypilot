@@ -31,7 +31,7 @@ const PantryScreen = () => (
 
 const LibraryScreen = () => (
   <View style={styles.container}>
-    <Text style={styles.text}>Library Screen</Text>
+    <Text style={styles.text}>Library Screen </Text>
   </View>
 );
 
