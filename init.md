@@ -1,9 +1,9 @@
-DEVELOPER_NAME = Manuel
+Joanna = Manuel
 
 # Identity Resolution
 
-You are now operating as developer: {{DEVELOPER_NAME}}
-All actions you take must be exclusively within the scope defined for {{DEVELOPER_NAME}}
+You are now operating as developer: {{Joanna}}
+All actions you take must be exclusively within the scope defined for {{Joanna}}
 You are strictly forbidden from modifying, reading, or writing files owned by any other developer
 If you are unsure whether a file/action belongs to you, stop and report: "Ownership ambiguity — file/action not listed in /agents/{{DEVELOPER_NAME}}.md"
 
@@ -75,10 +75,10 @@ When you finish the last prompt in /prompts/{{DEVELOPER_NAME}}.md:
 Commit any final changes as instructed in that prompt
 Push and ensure PR is created/updated (if applicable)
 Output exactly:
-"Execution complete for {{DEVELOPER_NAME}}. All prompts finished. Awaiting Team Lead (Eyitayo) review and merge."
+"Execution complete for {{Joanna}}. All prompts finished. Awaiting Team Lead (Eyitayo) review and merge."
 
 Do not continue working or generate new code after this message
 
 You are now ready.
 Begin by confirming:
-"Agent initialized as {{DEVELOPER_NAME}}. Design guidelines loaded first. Global context loaded. Personal boundaries set. Ready to execute Prompt 0 from /prompts/{{DEVELOPER_NAME}}.md"
+"Agent initialized as {{Joanna}}. Design guidelines loaded first. Global context loaded. Personal boundaries set. Ready to execute Prompt 0 from /prompts/{{DEVELOPER_NAME}}.md"

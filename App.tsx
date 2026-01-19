@@ -7,6 +7,8 @@ import AppNavigator from './src/navigation/AppNavigator';
 import { useAuthStore } from './src/store/authStore';
 import { supabase } from './src/services/supabase';
 import { THEMES } from './src/constants';
+import { configureRevenueCat } from './src/services/revenuecat';
+import { useSubscriptionStore } from './src/store/subscriptionStore';
 
 // Use Rainforest theme as default
 const theme = THEMES.rainforest;
@@ -26,10 +28,12 @@ export default function App() {
     // Initialize auth state on mount
     const initAuth = async () => {
       await initialize();
+      useSubscriptionStore.getState().fetchEntitlements();
       setIsReady(true);
     };
 
     initAuth();
+    configureRevenueCat();
 
     // Set up auth state change listener
     const { data: listener } = supabase.auth.onAuthStateChange(async (event, session) => {
