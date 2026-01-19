@@ -7,7 +7,7 @@ All actions you take must be exclusively within the scope defined for {{DEVELOPE
 You are strictly forbidden from modifying, reading, or writing files owned by any other developer
 If you are unsure whether a file/action belongs to you, stop and report: "Ownership ambiguity — file/action not listed in /agents/{{DEVELOPER_NAME}}.md"
 
-# Load Design Guidelines (First Priority)
+# Load Design Guidelines (First Priority.)
 
 Read file: design.md
 This file is the mandatory first reference
