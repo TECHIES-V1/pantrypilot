@@ -63,16 +63,14 @@ export default function ProcessingScreen() {
       // but prompt says "Mock navigation to next"
       // letting Moh hook real parse later.
       // We'll navigate back for now since we don't have GroceryListScreen yet.
-      // actually Prompt says: "navigate to GroceryListScreen or ReviewScreen (placeholder)"
       // I'll just Alert and go back for now to keep it safe until those exist
       // Or better, just stay there with a "Done" message?
       // Prompt says: "After 3-5s auto-navigate to next"
       // I will navigate to "RecipeInput" again for now with a success parameter or just back.
       // But clearing input might be annoying if testing.
-      // Let's just log verification for now.
-      console.log('Processing complete - would navigate to ReviewScreen');
-      navigation.goBack();
-    }, 4500);
+      // Simulate completion
+      navigation.replace('GroceryList', { recipeId: 'temp-id' });
+    }, 4500); // Short delay for transition
 
     return () => {
       clearInterval(interval);

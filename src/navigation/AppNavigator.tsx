@@ -11,6 +11,7 @@ import { AuthScreen } from '../screens/AuthScreen';
 import { ProfileScreen } from '../screens/ProfileScreen';
 import { RecipeInputScreen } from '../screens/RecipeInputScreen';
 import ProcessingScreen from '../screens/ProcessingScreen';
+import GroceryListScreen from '../screens/GroceryListScreen/GroceryListScreen';
 
 // Use Rainforest theme as default
 const theme = THEMES.rainforest;
@@ -98,6 +99,7 @@ export const AppNavigator = () => {
             <Stack.Screen name="Main" component={MainTabs} />
             <Stack.Screen name="RecipeInput" component={RecipeInputScreen} />
             <Stack.Screen name="Processing" component={ProcessingScreen} />
+            <Stack.Screen name="GroceryList" component={GroceryListScreen} />
           </>
         )}
       </Stack.Navigator>
