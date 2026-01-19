@@ -29,8 +29,12 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
+    "updates": {
+      "enabled": false
+    },
     "plugins": [
-      "expo-web-browser"
+      "expo-web-browser",
+      "@react-native-community/datetimepicker"
     ]
   }
 }
